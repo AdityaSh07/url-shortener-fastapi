@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>URL Shortener</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        p {
+            text-align: center;
+            color: #666;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #shorten-button {
+            background: #111;
+            color: white;
+        }
+
+        #result {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f1f3f5;
+            border-radius: 6px;
+            display: none;
+        }
+
+        #error {
+            margin-top: 15px;
+            color: #c0392b;
+            display: none;
+        }
+
+        a {
+            word-break: break-all;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>URL Shortener</h1>
+
+    <p>Convert a long URL into a short link.</p>
+
+    <div class="input-group">
+        <input
+            type="url"
+            id="url-input"
+            placeholder="https://example.com/very/long/url"
+            required
+        >
+
+        <button id="shorten-button">
+            Shorten
+        </button>
+    </div>
+
+    <div id="error"></div>
+
+    <div id="result">
+        <strong>Your shortened URL:</strong>
+        <br><br>
+
+        <a id="short-url" href="#" target="_blank"></a>
+    </div>
+
+</div>
+
+<script>
+    const input = document.getElementById("url-input");
+    const button = document.getElementById("shorten-button");
+    const result = document.getElementById("result");
+    const shortUrl = document.getElementById("short-url");
+    const error = document.getElementById("error");
+
+    button.addEventListener("click", async () => {
+
+        result.style.display = "none";
+        error.style.display = "none";
+
+        const url = input.value.trim();
+
+        if (!url) {
+            error.textContent = "Please enter a URL.";
+            error.style.display = "block";
+            return;
+        }
+
+        try {
+            const response = await fetch("/shorten", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    url: url
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                error.textContent =
+                    data.detail?.[0]?.msg ||
+                    data.detail ||
+                    "Something went wrong.";
+
+                error.style.display = "block";
+                return;
+            }
+
+            shortUrl.textContent = data.short_url;
+            shortUrl.href = data.short_url;
+
+            result.style.display = "block";
+
+        } catch (err) {
+            error.textContent = "Unable to connect to the server.";
+            error.style.display = "block";
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Environment / secrets
+.env
+
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Git
+.git/
+.gitignore
+
+# Documentation / examples
+README.md
+.env.example
+
